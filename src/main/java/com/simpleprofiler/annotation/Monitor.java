@@ -10,11 +10,8 @@ import java.lang.annotation.Target;
  * Created on 17.12.2019
  **/
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD})
 public @interface Monitor
 {
-    String SHORTLY = "shortly";
-    String DETAILED = "details";
-
-    String value();
+    MonitorPolicy value();
 }

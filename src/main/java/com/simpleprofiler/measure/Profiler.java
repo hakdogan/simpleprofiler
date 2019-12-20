@@ -2,6 +2,7 @@ package com.simpleprofiler.measure;
 
 import ch.qos.logback.classic.Logger;
 import com.simpleprofiler.annotation.Monitor;
+import com.simpleprofiler.annotation.MonitorPolicy;
 import com.simpleprofiler.exception.TypeMismatchException;
 import com.simpleprofiler.exception.MissingArgumentException;
 import com.simpleprofiler.exception.ObjectReferenceException;
@@ -25,19 +26,18 @@ public class Profiler
 
     /**
      *
-     * @param o
+     * @param object
      * @param parameter
      */
-    public static void executor(final Object o, final Object... parameter) {
-
-        checkObjectReference(o);
-        final Method[] methods = o.getClass().getDeclaredMethods();
+    public static void executor(final Object object, final Object... parameter) {
+        checkObjectReference(object);
+        final Method[] methods = object.getClass().getDeclaredMethods();
         for(Method m :methods){
             if(m.isAnnotationPresent(com.simpleprofiler.annotation.Monitor.class)){
                 if(parameter.length > 0){
-                    invoker(m, o, parameter);
+                    invoker(m, object, parameter);
                 } else {
-                    invoker(m, o);
+                    invoker(m, object);
                 }
             }
         }
@@ -45,19 +45,19 @@ public class Profiler
 
     /**
      *
-     * @param o
+     * @param object
      * @param name
      * @param parameter
      */
-    public static void executor(final Object o, final String name, final Object... parameter) {
-        checkObjectReference(o);
-        final Method[] methods = o.getClass().getDeclaredMethods();
-        for(Method m :methods){
-            if(m.getName().equals(name) && m.isAnnotationPresent(Monitor.class)){
+    public static void executorWithMethodName(final Object object, final String name, final Object... parameter) {
+        checkObjectReference(object);
+        final Method[] methods = object.getClass().getDeclaredMethods();
+        for(Method method :methods){
+            if(method.getName().equals(name) && method.isAnnotationPresent(Monitor.class)){
                 if(parameter.length > 0){
-                    invoker(m, o, parameter);
+                    invoker(method, object, parameter);
                 } else {
-                    invoker(m, o);
+                    invoker(method, object);
                 }
             }
         }
@@ -66,28 +66,27 @@ public class Profiler
     /**
      *
      * @param method
-     * @param o
+     * @param object
      * @param parameters
      */
-    private static void invoker(final Method method, Object o, Object... parameters) {
+    private static void invoker(final Method method, Object object, Object... parameters) {
 
         method.setAccessible(true);
-        final String value = method.getAnnotation(Monitor.class).value();
+        final MonitorPolicy policy = method.getAnnotation(Monitor.class).value();
         long start = System.currentTimeMillis();
 
         try {
-
             if (parameters.length > 0) {
                 checkTypeMismatch(method.getName(), method.getParameters(), parameters);
-                method.invoke(o, parameters);
+                method.invoke(object, parameters);
             } else if(method.getGenericParameterTypes().length > 0){
                 throw new MissingArgumentException("The parameter(s) of the " + method.getName() + " method are missing");
             } else {
-                method.invoke(o);
+                method.invoke(object);
             }
 
             final long end = System.currentTimeMillis();
-            if(value.equals("shortly")){
+            if(policy.equals(MonitorPolicy.SHORT)){
                 logger.info( "{} ms", (end - start));
             } else {
                 logger.info("Total execution time of {} method is {} ms",  method.getName(), (end - start));
@@ -131,6 +130,5 @@ public class Profiler
             }
             throw new UnexpectedArgumentException(exMessage.toString());
         }
-
     }
 }
