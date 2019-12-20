@@ -19,7 +19,6 @@ import java.util.Objects;
  **/
 public class Profiler
 {
-
     private static final Logger logger = (Logger) LoggerFactory.getLogger(Profiler.class);
 
     private Profiler() {}
@@ -29,18 +28,20 @@ public class Profiler
      * @param object
      * @param parameter
      */
-    public static void executor(final Object object, final Object... parameter) {
+    public static String executor(final Object object, final Object... parameter) {
         checkObjectReference(object);
+        final StringBuilder result = new StringBuilder();
         final Method[] methods = object.getClass().getDeclaredMethods();
         for(Method m :methods){
             if(m.isAnnotationPresent(com.simpleprofiler.annotation.Monitor.class)){
                 if(parameter.length > 0){
-                    invoker(m, object, parameter);
+                    result.append(invoker(m, object, parameter));
                 } else {
-                    invoker(m, object);
+                    result.append(invoker(m, object));
                 }
             }
         }
+        return result.toString();
     }
 
     /**
@@ -48,19 +49,23 @@ public class Profiler
      * @param object
      * @param name
      * @param parameter
+     *
+     * @return
      */
-    public static void executorWithMethodName(final Object object, final String name, final Object... parameter) {
+    public static String executorWithMethodName(final Object object, final String name, final Object... parameter) {
         checkObjectReference(object);
+        final StringBuilder result = new StringBuilder();
         final Method[] methods = object.getClass().getDeclaredMethods();
         for(Method method :methods){
             if(method.getName().equals(name) && method.isAnnotationPresent(Monitor.class)){
                 if(parameter.length > 0){
-                    invoker(method, object, parameter);
+                    result.append(invoker(method, object, parameter));
                 } else {
-                    invoker(method, object);
+                    result.append(invoker(method, object));
                 }
             }
         }
+        return result.toString();
     }
 
     /**
@@ -68,10 +73,13 @@ public class Profiler
      * @param method
      * @param object
      * @param parameters
+     *
+     * @return
      */
-    private static void invoker(final Method method, Object object, Object... parameters) {
+    private static String invoker(final Method method, Object object, Object... parameters) {
 
         method.setAccessible(true);
+        final StringBuilder result = new StringBuilder();
         final MonitorPolicy policy = method.getAnnotation(Monitor.class).value();
         long start = System.currentTimeMillis();
 
@@ -87,8 +95,14 @@ public class Profiler
 
             final long end = System.currentTimeMillis();
             if(policy.equals(MonitorPolicy.SHORT)){
+                result.append(end - start).append(" ms");
                 logger.info( "{} ms", (end - start));
             } else {
+                result.append("Total execution time of ")
+                        .append(method.getName())
+                        .append(" method is ")
+                        .append(end - start)
+                        .append(" ms");
                 logger.info("Total execution time of {} method is {} ms",  method.getName(), (end - start));
             }
 
@@ -103,6 +117,8 @@ public class Profiler
             }
             throw new TypeMismatchException(exMessage.toString());
         }
+
+        return result.toString();
     }
 
     /**

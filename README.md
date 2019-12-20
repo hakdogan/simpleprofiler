@@ -7,7 +7,7 @@ This application demonstrates how to use custom annotations and processing them 
 For short information
 
 ```java
-@Monitor(Monitor.SHORTLY)
+@Monitor(MonitorPolicy.SHORT)
     private static void getUserInfo(){
         // //Make HTTP request...
     }
@@ -20,7 +20,7 @@ Result of
 
 For detailed information
 ```java
-@Monitor(Monitor.DETAILED)
+@Monitor(MonitorPolicy.DETAILED)
     private static void getUserInfo(){
         // //Make HTTP request...
     }
