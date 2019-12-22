@@ -16,22 +16,24 @@ import org.junit.jupiter.api.Test;
 
 public class ProfilerTest
 {
+    private static final String DETAILED_RETURN_TEXT_PREFIX = "Total execution time of";
+
     @Test
     public void shortResultTest(){
-        Assertions.assertFalse(Profiler.executorWithMethodName(new User(), "getShortUserInfo")
-                .contains("Total execution time of"));
+        Assertions.assertFalse(Profiler.executorByMethodName(new User(), "getShortUserInfo")
+                .contains(DETAILED_RETURN_TEXT_PREFIX));
     }
 
     @Test
     public void detailedResultTest(){
-        Assertions.assertTrue(Profiler.executorWithMethodName(new User(), "getDetailUserInfo")
-                .contains("Total execution time of"));
+        Assertions.assertTrue(Profiler.executorByMethodName(new User(), "getDetailUserInfo")
+                .contains(DETAILED_RETURN_TEXT_PREFIX));
     }
 
     @Test
     public void missingArgumentExceptionTest(){
         Assertions.assertThrows(MissingArgumentException.class, () -> {
-            Profiler.executorWithMethodName(new User(), "getUserInfoWithId");
+            Profiler.executor(new User());
         });
     }
 
@@ -45,14 +47,14 @@ public class ProfilerTest
     @Test
     public void objectReferenceExceptionTest(){
         Assertions.assertThrows(ObjectReferenceException.class, () -> {
-            Profiler.executor(null, "getUserInfoWithId");
+            Profiler.executor(null);
         });
     }
 
     @Test
     public void typeMismatchExceptionTest(){
         Assertions.assertThrows(TypeMismatchException.class, () -> {
-            Profiler.executorWithMethodName(new User(), "getUserInfoWithId", "invalidArgument");
+            Profiler.executorByMethodName(new User(), "getUserInfoWithId", "invalidArgument");
         });
     }
 }

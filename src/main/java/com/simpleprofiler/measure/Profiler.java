@@ -26,18 +26,18 @@ public class Profiler
     /**
      *
      * @param object
-     * @param parameter
+     * @param passedParameters
      */
-    public static String executor(final Object object, final Object... parameter) {
+    public static String executor(final Object object, final Object... passedParameters) {
         checkObjectReference(object);
         final StringBuilder result = new StringBuilder();
         final Method[] methods = object.getClass().getDeclaredMethods();
-        for(Method m :methods){
-            if(m.isAnnotationPresent(com.simpleprofiler.annotation.Monitor.class)){
-                if(parameter.length > 0){
-                    result.append(invoker(m, object, parameter));
+        for(Method method :methods){
+            if(method.isAnnotationPresent(com.simpleprofiler.annotation.Monitor.class)){
+                if(passedParameters.length > 0){
+                    result.append(invoker(method, object, passedParameters));
                 } else {
-                    result.append(invoker(m, object));
+                    result.append(invoker(method, object));
                 }
             }
         }
@@ -47,19 +47,19 @@ public class Profiler
     /**
      *
      * @param object
-     * @param name
-     * @param parameter
+     * @param methodName
+     * @param passedParameters
      *
      * @return
      */
-    public static String executorWithMethodName(final Object object, final String name, final Object... parameter) {
+    public static String executorByMethodName(final Object object, final String methodName, final Object... passedParameters) {
         checkObjectReference(object);
         final StringBuilder result = new StringBuilder();
         final Method[] methods = object.getClass().getDeclaredMethods();
         for(Method method :methods){
-            if(method.getName().equals(name) && method.isAnnotationPresent(Monitor.class)){
-                if(parameter.length > 0){
-                    result.append(invoker(method, object, parameter));
+            if(method.getName().equals(methodName) && method.isAnnotationPresent(Monitor.class)){
+                if(passedParameters.length > 0){
+                    result.append(invoker(method, object, passedParameters));
                 } else {
                     result.append(invoker(method, object));
                 }
@@ -72,11 +72,11 @@ public class Profiler
      *
      * @param method
      * @param object
-     * @param parameters
+     * @param passedParameters
      *
      * @return
      */
-    private static String invoker(final Method method, Object object, Object... parameters) {
+    private static String invoker(final Method method, Object object, Object... passedParameters) {
 
         method.setAccessible(true);
         final StringBuilder result = new StringBuilder();
@@ -84,9 +84,9 @@ public class Profiler
         long start = System.currentTimeMillis();
 
         try {
-            if (parameters.length > 0) {
-                checkTypeMismatch(method.getName(), method.getParameters(), parameters);
-                method.invoke(object, parameters);
+            if (passedParameters.length > 0) {
+                checkTypeMismatch(method.getName(), method.getParameters(), passedParameters);
+                method.invoke(object, passedParameters);
             } else if(method.getGenericParameterTypes().length > 0){
                 throw new MissingArgumentException("The parameter(s) of the " + method.getName() + " method are missing");
             } else {
@@ -133,15 +133,15 @@ public class Profiler
 
     /**
      *
-     * @param name
-     * @param parameters
-     * @param arguments
+     * @param methodName
+     * @param methodParameters
+     * @param passedParameters
      */
-    private static void checkTypeMismatch(final String name, final Parameter[] parameters, final Object... arguments){
-        if(parameters.length == 0 || parameters.length != arguments.length){
+    private static void checkTypeMismatch(final String methodName, final Parameter[] methodParameters, final Object... passedParameters){
+        if(methodParameters.length == 0 || methodParameters.length != passedParameters.length){
             StringBuilder exMessage = new StringBuilder().append("Unexpected or missing argument in ")
-                    .append(name).append(" method. Expected type ");
-            for(Parameter p :parameters){
+                    .append(methodName).append(" method. Expected type ");
+            for(Parameter p :methodParameters){
                 exMessage.append(p.getName()).append(" ").append(p.getType().getName()).append(" ");
             }
             throw new UnexpectedArgumentException(exMessage.toString());
