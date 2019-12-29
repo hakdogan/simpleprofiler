@@ -2,7 +2,7 @@
 
 This application demonstrates how to use custom annotations and processing them in around a simple profiling example.
 
-## How to use
+## How to Use
 
 For short information
 
@@ -15,7 +15,7 @@ For short information
 
 Result of
 ```
-0 ms
+Total execution time of getShortUserInfo method is 326 ms
 ```
 
 For detailed information
@@ -28,5 +28,5 @@ For detailed information
 
 Result of
 ```
-Total execution time of getUserInfo method is 1459 ms
+The getDetailUserInfo method start time is 2019-12-29 15:43:21 end time is 2019-12-29 15:43:22 , total execution time as milliseconds is 351
 ```

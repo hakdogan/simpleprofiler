@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 public class ProfilerTest
 {
-    private static final String DETAILED_RETURN_TEXT_PREFIX = "Total execution time of";
+    private static final String DETAILED_RETURN_TEXT_PREFIX = "start time is";
 
     @Test
     public void shortResultTest(){

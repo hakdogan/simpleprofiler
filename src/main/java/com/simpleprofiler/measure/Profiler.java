@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 
 /**
@@ -79,7 +82,6 @@ public class Profiler
     private static String invoker(final Method method, Object object, Object... passedParameters) {
 
         method.setAccessible(true);
-        final StringBuilder result = new StringBuilder();
         final MonitorPolicy policy = method.getAnnotation(Monitor.class).value();
         long start = System.currentTimeMillis();
 
@@ -91,19 +93,6 @@ public class Profiler
                 throw new MissingArgumentException("The parameter(s) of the " + method.getName() + " method are missing");
             } else {
                 method.invoke(object);
-            }
-
-            final long end = System.currentTimeMillis();
-            if(policy.equals(MonitorPolicy.SHORT)){
-                result.append(end - start).append(" ms");
-                logger.info( "{} ms", (end - start));
-            } else {
-                result.append("Total execution time of ")
-                        .append(method.getName())
-                        .append(" method is ")
-                        .append(end - start)
-                        .append(" ms");
-                logger.info("Total execution time of {} method is {} ms",  method.getName(), (end - start));
             }
 
         } catch (InvocationTargetException ite){
@@ -118,7 +107,7 @@ public class Profiler
             throw new TypeMismatchException(exMessage.toString());
         }
 
-        return result.toString();
+        return printOfExecutionTime(start, System.currentTimeMillis(), method.getName(), policy);
     }
 
     /**
@@ -137,7 +126,8 @@ public class Profiler
      * @param methodParameters
      * @param passedParameters
      */
-    private static void checkTypeMismatch(final String methodName, final Parameter[] methodParameters, final Object... passedParameters){
+    private static void checkTypeMismatch(final String methodName, final Parameter[] methodParameters,
+                                          final Object... passedParameters){
         if(methodParameters.length == 0 || methodParameters.length != passedParameters.length){
             StringBuilder exMessage = new StringBuilder().append("Unexpected or missing argument in ")
                     .append(methodName).append(" method. Expected type ");
@@ -147,4 +137,66 @@ public class Profiler
             throw new UnexpectedArgumentException(exMessage.toString());
         }
     }
+
+    /**
+     *
+     * @param startTime
+     * @param endTime
+     * @param methodName
+     * @param policy
+     *
+     * @return
+     */
+    private static String printOfExecutionTime(final long startTime, final long endTime,
+                                     final String methodName, final MonitorPolicy policy){
+        final StringBuilder result = new StringBuilder();
+        if(policy.equals(MonitorPolicy.SHORT)){
+            result.append("Total execution time of ")
+                    .append(methodName)
+                    .append(" method is ")
+                    .append(endTime - startTime)
+                    .append(" ms");
+            logger.info( "Total execution time of {} method is {} ms", methodName, (endTime - startTime));
+        } else {
+            final String startDateTime = convertToStringForPrint(startTime);
+            final String endDateTime = convertToStringForPrint(endTime);
+            result.append("The ")
+                    .append(methodName)
+                    .append(" method start time is ")
+                    .append(startDateTime)
+                    .append(" end time is ")
+                    .append(endDateTime)
+                    .append(", total execution time as milliseconds is ")
+                    .append(endTime - startTime);
+            logger.info("The {} method start time is {} end time is {} " +
+                    ", total execution time as milliseconds is {}",  methodName, startDateTime,
+                    endDateTime, (endTime - startTime));
+        }
+
+        return result.toString();
+    }
+
+    /**
+     *
+     * @param millisecond
+     * @return
+     */
+    private static String convertToStringForPrint(final long millisecond){
+        LocalDateTime dateTime =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(millisecond), ZoneId.systemDefault());
+
+        return new StringBuilder().append(dateTime.getYear())
+                .append("-")
+                .append(dateTime.getMonthValue())
+                .append("-")
+                .append(dateTime.getDayOfMonth())
+                .append(" ")
+                .append(dateTime.getHour())
+                .append(":")
+                .append(dateTime.getMinute())
+                .append(":")
+                .append(dateTime.getSecond())
+                .toString();
+    }
+
 }
