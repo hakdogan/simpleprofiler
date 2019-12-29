@@ -1,4 +1,7 @@
 # SIMPLE PROFILER
+[![Build Status](https://travis-ci.org/hakdogan/simpleprofiler.svg?branch=master)](https://travis-ci.org/hakdogan/simpleprofiler)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.kodcu%3Asimple-profiler&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.kodcu%3Asimple-profiler)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.kodcu%3Asimple-profiler&metric=coverage)](https://sonarcloud.io/dashboard?id=com.kodcu%3Asimple-profiler)
 
 This application demonstrates how to use custom annotations and processing them in around a simple profiling example.
 
