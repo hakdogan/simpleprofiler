@@ -14,47 +14,83 @@ import org.junit.jupiter.api.Test;
  * Created on 20.12.2019
  **/
 
-public class ProfilerTest
+class ProfilerTest
 {
     private static final String DETAILED_RETURN_TEXT_PREFIX = "start time is";
+    private static final User user = new User();
 
     @Test
-    public void shortResultTest(){
+    void testToShortResult(){
         Assertions.assertFalse(Profiler.executorByMethodName(new User(), "getShortUserInfo")
                 .contains(DETAILED_RETURN_TEXT_PREFIX));
     }
 
     @Test
-    public void detailedResultTest(){
+    void testToDetailedResult(){
         Assertions.assertTrue(Profiler.executorByMethodName(new User(), "getDetailUserInfo")
                 .contains(DETAILED_RETURN_TEXT_PREFIX));
     }
 
     @Test
-    public void missingArgumentExceptionTest(){
-        Assertions.assertThrows(MissingArgumentException.class, () -> {
-            Profiler.executor(new User());
-        });
+    void testToMissingArgumentException(){
+        Assertions.assertThrows(MissingArgumentException.class, () -> Profiler.executor(user));
     }
 
     @Test
-    public void unexpectedArgumentExceptionTest(){
-        Assertions.assertThrows(UnexpectedArgumentException.class, () -> {
-            Profiler.executor(new User(), "getUserInfoWithId");
-        });
+    void testToMissingArgumentExceptionTryCatchIdiom(){
+
+        try {
+            Profiler.executor(user);
+            Assertions.fail("Expected a MissingArgumentException to be thrown");
+        } catch (MissingArgumentException ex){}
+
     }
 
     @Test
-    public void objectReferenceExceptionTest(){
-        Assertions.assertThrows(ObjectReferenceException.class, () -> {
+    void testToUnexpectedArgumentException(){
+        Assertions.assertThrows(UnexpectedArgumentException.class,
+                () -> Profiler.executor(user, "getUserInfoWithId"));
+    }
+
+    @Test
+    void testToUnexpectedArgumentExceptionTryCatchIdiom(){
+
+        try {
+            Profiler.executor(user, "getUserInfoWithId");
+            Assertions.fail("Expected an UnexpectedArgumentException to be thrown");
+        } catch (UnexpectedArgumentException ex){}
+
+    }
+
+    @Test
+    void testToObjectReferenceException(){
+        Assertions.assertThrows(ObjectReferenceException.class, () -> Profiler.executor(null));
+    }
+
+    @Test
+    void testToObjectReferenceExceptionTryCatchIdiom(){
+
+        try {
+
             Profiler.executor(null);
-        });
+            Assertions.fail("Expected an ObjectReferenceException to be thrown");
+        } catch (ObjectReferenceException ex){}
+
     }
 
     @Test
-    public void typeMismatchExceptionTest(){
-        Assertions.assertThrows(TypeMismatchException.class, () -> {
-            Profiler.executorByMethodName(new User(), "getUserInfoWithId", "invalidArgument");
-        });
+    void testToTypeMismatchException(){
+        Assertions.assertThrows(TypeMismatchException.class,
+                () -> Profiler.executorByMethodName(user, "getUserInfoWithId", "invalidArgument"));
+    }
+
+    @Test
+    void testToTypeMismatchExceptionTryCatchIdiom(){
+
+        try {
+            Profiler.executorByMethodName(user, "getUserInfoWithId", "invalidArgument");
+            Assertions.fail("Expected a TypeMismatchException to be thrown");
+        } catch (TypeMismatchException ex){}
+
     }
 }
