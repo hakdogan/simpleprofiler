@@ -56,10 +56,13 @@ public class Profiler
      * @return
      */
     public static String executorByMethodName(final Object object, final String methodName, final Object... passedParameters) {
+
         checkObjectReference(object);
         final StringBuilder result = new StringBuilder();
         final Method[] methods = object.getClass().getDeclaredMethods();
+
         for(Method method :methods){
+
             if(method.getName().equals(methodName) && method.isAnnotationPresent(Monitor.class)){
                 if(passedParameters.length > 0){
                     result.append(invoker(method, object, passedParameters));
@@ -67,6 +70,7 @@ public class Profiler
                     result.append(invoker(method, object));
                 }
             }
+
         }
         return result.toString();
     }
@@ -86,6 +90,7 @@ public class Profiler
         long start = System.currentTimeMillis();
 
         try {
+
             if (passedParameters.length > 0) {
                 checkTypeMismatch(method.getName(), method.getParameters(), passedParameters);
                 method.invoke(object, passedParameters);
@@ -128,9 +133,12 @@ public class Profiler
      */
     private static void checkTypeMismatch(final String methodName, final Parameter[] methodParameters,
                                           final Object... passedParameters){
+
         if(methodParameters.length == 0 || methodParameters.length != passedParameters.length){
+
             StringBuilder exMessage = new StringBuilder().append("Unexpected or missing argument in ")
                     .append(methodName).append(" method. Expected type ");
+
             for(Parameter p :methodParameters){
                 exMessage.append(p.getName()).append(" ").append(p.getType().getName()).append(" ");
             }
@@ -149,15 +157,19 @@ public class Profiler
      */
     private static String printOfExecutionTime(final long startTime, final long endTime,
                                      final String methodName, final MonitorPolicy policy){
+
         final StringBuilder result = new StringBuilder();
         if(policy.equals(MonitorPolicy.SHORT)){
+
             result.append("Total execution time of ")
                     .append(methodName)
                     .append(" method is ")
                     .append(endTime - startTime)
                     .append(" ms");
             logger.info( "Total execution time of {} method is {} ms", methodName, (endTime - startTime));
+
         } else {
+
             final String startDateTime = convertToStringForPrint(startTime);
             final String endDateTime = convertToStringForPrint(endTime);
             result.append("The ")
@@ -168,6 +180,7 @@ public class Profiler
                     .append(endDateTime)
                     .append(", total execution time as milliseconds is ")
                     .append(endTime - startTime);
+
             logger.info("The {} method start time is {} end time is {} " +
                     ", total execution time as milliseconds is {}",  methodName, startDateTime,
                     endDateTime, (endTime - startTime));
@@ -182,6 +195,7 @@ public class Profiler
      * @return
      */
     private static String convertToStringForPrint(final long millisecond){
+
         LocalDateTime dateTime =
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(millisecond), ZoneId.systemDefault());
 
@@ -198,5 +212,4 @@ public class Profiler
                 .append(dateTime.getSecond())
                 .toString();
     }
-
 }
